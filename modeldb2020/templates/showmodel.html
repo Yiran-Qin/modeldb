@@ -35,6 +35,7 @@
                     placeholder: "Select simulation environments",
                 });
                 $('#savebutton').click(do_save);
+                $('#makepublic').click(do_request);
                 $("select").on("select2:select", function (evt) {
                     var element = evt.params.data.element;
                     var $element = $(element);
@@ -43,7 +44,34 @@
                     $(this).append($element);
                     $(this).trigger("change");
                 });
-            });                
+            });          
+            
+            function do_request() {
+                $.ajax(
+                    '/api/v1/models/{{Model.id}}',
+                    {
+                        success: () => handle_request_response('', 'success'),
+                        error: () => handle_request_response('', 'failed'),
+                        data: JSON.stringify(build_all_data()),
+                        type: 'PUT'
+                    }
+                );
+            }
+            function handle_request_response(data, status) {
+                let msg;
+                if (status == 'success') {
+                    msg = 'Request successful';
+                    bgcolor = 'lightgreen';
+                } else {
+                    msg = 'Something went wrong';
+                    bgcolor = 'pink';
+                }
+                $('#saveresults').html(`<center>${msg}</center>`).css('background-color', bgcolor).show();
+                setTimeout(() => {
+                    $('#saveresults').hide();
+                }, 3000);
+            }
+
             function do_save() {
                 $.ajax(
                     '/api/v1/models/{{Model.id}}',
